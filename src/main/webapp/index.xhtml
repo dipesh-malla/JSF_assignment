@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+<h:head>
+    <title>Student CRUD</title>
+</h:head>
+<h:body>
+    <h:form id="form">
+
+        <h3>Student Form</h3>
+
+        <h:panelGrid columns="2" cellpadding="5">
+
+            <h:outputLabel for="name" value="Student Name:" />
+            <h:inputText id="name"
+                         value="#{studentBean.student.name}"
+                         required="true"
+                         requiredMessage="Student Name is required." />
+
+            <h:outputLabel for="address" value="Student Address:" />
+            <h:inputText id="address"
+                         value="#{studentBean.student.address}"
+                         required="true"
+                         requiredMessage="Student Address is required." />
+
+            <h:outputLabel for="studentClass" value="Student Class:" />
+            <p:selectOneMenu id="studentClass"
+                             value="#{studentBean.student.studentClass}"
+                             required="true"
+                             requiredMessage="Student Class is required.">
+                <f:selectItem itemLabel="Select Class" itemValue="" />
+                <f:selectItems value="#{studentBean.subjectsByClass.keySet()}" />
+                <p:ajax listener="#{studentBean.onClassChange}" update="subject" process="@this" />
+            </p:selectOneMenu>
+
+            <h:outputLabel for="subject" value="Subject:" />
+            <p:selectOneMenu id="subject"
+                             value="#{studentBean.student.subject}"
+                             required="true"
+                             requiredMessage="Subject is required.">
+                <f:selectItem itemLabel="Select Subject" itemValue="" />
+                <f:selectItems value="#{studentBean.availableSubjects}" var="subj" itemValue="#{subj}" itemLabel="#{subj}" />
+            </p:selectOneMenu>
+
+        </h:panelGrid>
+
+
+        <p:commandButton value="Save" action="#{studentBean.save}"
+                         update="@form :form:studentTable :form:messages"
+                         process="@form" />
+
+
+        <p:messages id="messages"  />
+
+        <h3>Student List</h3>
+
+        <p:dataTable id="studentTable" value="#{studentBean.students}" var="stud" editable="true" >
+
+            <p:column headerText="Name">
+                <h:outputText value="#{stud.name}" />
+            </p:column>
+
+            <p:column headerText="Address">
+                <h:outputText value="#{stud.address}" />
+            </p:column>
+
+            <p:column headerText="Class">
+                <h:outputText value="#{stud.studentClass}" />
+            </p:column>
+
+            <p:column headerText="Subject">
+                <h:outputText value="#{stud.subject}" />
+            </p:column>
+
+            <p:column headerText="Actions" style="width:200px">
+                <p:commandButton value="Edit" title="Edit" update=":editDialog" oncomplete="PF('editDialog').show()" actionListener="#{studentBean.edit(stud)}" process="@this" />
+                <p:commandButton value="Delete" title="Delete" update="form:studentTable form:messages" actionListener="#{studentBean.delete(stud)}" process="@this" style="margin-left:10px" />
+            </p:column>
+        </p:dataTable>
+
+    </h:form>
+
+    <p:dialog id="editDialog" header="Edit Student" widgetVar="editDialog" modal="true" resizable="false" draggable="false" appendTo="@(body)">
+        <h:form id="editForm">
+            <h:panelGrid columns="2" cellpadding="5">
+
+                <h:outputLabel for="editName" value="Student Name:" />
+                <h:inputText id="editName" value="#{studentBean.selectedStudent.name}" required="true" />
+
+                <h:outputLabel for="editAddress" value="Student Address:" />
+                <h:inputText id="editAddress" value="#{studentBean.selectedStudent.address}" required="true" />
+
+                <h:outputLabel for="editClass" value="Student Class:" />
+                <p:selectOneMenu id="editClass" value="#{studentBean.selectedStudent.studentClass}" required="true">
+                    <f:selectItem itemLabel="Select Class" itemValue="" />
+                    <f:selectItems value="#{studentBean.subjectsByClass.keySet()}" />
+                    <p:ajax listener="#{studentBean.onEditClassChange}" update="editSubject" />
+                </p:selectOneMenu>
+
+                <h:outputLabel for="editSubject" value="Subject:" />
+                <p:selectOneMenu id="editSubject" value="#{studentBean.selectedStudent.subject}" required="true" >
+                    <f:selectItem itemLabel="Select Subject" itemValue="" />
+                    <f:selectItems value="#{studentBean.subjectsByClass[studentBean.selectedStudent.studentClass]}" />
+                </p:selectOneMenu>
+
+            </h:panelGrid>
+
+            <p:commandButton value="Update" action="#{studentBean.update}" update=":form:studentTable form:messages" oncomplete="PF('editDialog').hide()" process="@form"/>
+            <p:commandButton value="Cancel" onclick="PF('editDialog').hide();return false;" type="button" style="margin-left:10px"/>
+        </h:form>
+    </p:dialog>
+</h:body>
+</html>
